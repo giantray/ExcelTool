@@ -9,9 +9,19 @@
 - **值类型自动识别** 检测每个表格的内容，是数字、字符串、还是时间，依据类型的不同，做人性化、合理的显示
 
 ##如何使用
-1、把本项目git代码下载到本地
-2、在Test类中，提供了一个测试类，为你演示了如何生成。下面介绍这个测试类
-3、首先，将数据塞到ExportExcelBean这个类中
+1、引入到项目
+项目已经传到珠海YY游戏的maven仓库，因此珠海同事可以直接引入
+```xml
+<dependency>
+  <groupId>com.duowan.leopard.officeutil</groupId>
+  <artifactId>excel</artifactId>
+  <version>0.9</version>
+</dependency>	
+```
+如果不是珠海同事，请将git代码下载到本地，直接引入到自己项目中
+
+2、在Test类中，提供了一个测试类，为你演示了如何生成，建议您直接看看测试类中的demo。下面介绍这个demo
+3、首先，demo代码中，会将数据塞到ExportExcelBean这个类中
 ```java
 		List<Object> li = new ArrayList<Object>();
 		TestBean testBean = new TestBean();

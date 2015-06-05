@@ -22,16 +22,13 @@ public class Test extends TestCase {
 		long start = System.currentTimeMillis();
 
 		List<Object> li = new ArrayList<Object>();
-
 		TestBean testBean = new TestBean();
 		testBean.setIntTest(8888);
 		testBean.setStrTest("88888.888");
 		testBean.setTimeTest(new Timestamp(System.currentTimeMillis()));
-
 		for (int i = 0; i < 1000; i++) {
 			li.add(testBean);
 		}
-
 		LinkedHashMap<String, String> keyMap = new LinkedHashMap<String, String>();
 		keyMap.put("timeTest", "time类型");
 		keyMap.put("intTest", "int类型");
@@ -42,23 +39,21 @@ public class Test extends TestCase {
 		bean1.setContentList(li);
 		bean1.setKeyMap(keyMap);
 		bean1.setSheetName("测试1");
-
 		ExportExcelBean bean2 = new ExportExcelBean();
 		bean2.setContentList(li);
 		bean2.setKeyMap(keyMap);
 		bean2.setSheetName("测试2");
 
 		sheetContentList.add(bean1);
-
 		sheetContentList.add(bean2);
 
-		OutputStream out;
+		File file = new File("d:/yy-export-excel");
+		file.mkdirs();
+
 		try {
 			ExportExcelUtil util = new ExportExcelUtil();
-			File file = new File("d:/yy-export-excel");
-			file.mkdirs();
 
-			out = new FileOutputStream("d:/yy-export-excel/test.xls");
+			OutputStream out = new FileOutputStream("d:/yy-export-excel/test.xls");
 			util.export(sheetContentList, out);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

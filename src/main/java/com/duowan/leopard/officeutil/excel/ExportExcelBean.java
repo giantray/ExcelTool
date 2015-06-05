@@ -8,10 +8,18 @@ import java.util.List;
  * @date 2015年5月29日
  */
 public class ExportExcelBean {
+	/**
+	 * 要填充的内容
+	 */
 	private List<Object> contentList;
 
+	/**
+	 * 表列标题名称
+	 */
 	private LinkedHashMap<String, String> keyMap;
-
+	/**
+	 * 分表名
+	 */
 	private String sheetName;
 
 	public List<Object> getContentList() {

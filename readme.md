@@ -70,7 +70,7 @@ keyMap:表列名及属性映射关系。请注意，这是一个LinkedHashMap，
 			util.export(sheetContentList, out);
 ```
 5、最后，我们看下生成的excel
-最后，完全没有写任何excel配置代码，只关注塞数据，excel就可以生成了。下图为例子所生成的excel，可以看到，每列的顺序，就是keyMap的先后顺序。而时间值已默认转换成可读的时间样式，数字则被右下对齐，方便阅读。每个各自都有边框
+完全没有写任何excel配置代码，只关注塞数据，excel就可以生成了。下图为例子所生成的excel，可以看到，每列的顺序，就是keyMap的先后顺序。而时间值已默认转换成可读的时间样式，数字则被右下对齐，方便阅读。每个各自都有边框
 ![上传图片](http://image.game.yy.com/o/cloudapp/25586759/170x170/201506-dd57702f_f6b1_48ec_b604_6d782f9608b9.png)
 
 

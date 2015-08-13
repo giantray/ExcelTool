@@ -8,20 +8,18 @@
 - **宽度自适应** 针对中文做优化，确保excel表格能依据文字宽度确定每个表格宽度
 - **值类型自动识别** 检测每个表格的内容，是数字、字符串、还是时间，依据类型的不同，做人性化、合理的显示
 
-##如何使用
-1、引入到项目
-项目已经传到珠海YY游戏的maven仓库，因此珠海同事可以直接引入
-```xml
-<dependency>
-  <groupId>com.duowan.leopard.officeutil</groupId>
-  <artifactId>excel</artifactId>
-  <version>0.9</version>
-</dependency>	
-```
-如果不是珠海同事，请将git代码下载到本地，直接引入到自己项目中
+##引入
+正准备把项目发布到maven仓库，还没搞。现在只能先把代码copy到本地使用
 
-2、在Test类中，提供了一个测试类，为你演示了如何生成，建议您直接看看测试类中的demo。下面介绍这个demo
-3、首先，demo代码中，会将数据塞到ExportExcelBean这个类中
+##如何使用
+提供了两种使用方式，一种是基于传参的方式，一种是基于注解的方式。
+
+###2、基于传参
+所谓基于参数，是指excel中要展示的列，列名，顺序等通过构建一个参数bean来指定。
+
+2.1、在MainTest类中，提供了一个测试类，为你演示了如何生成，建议您直接看看测试类中的demo。下面介绍这个demo
+
+2.2、首先，demo代码中，会将数据塞到ExportExcelBean这个类中
 ```java
 		List<Object> li = new ArrayList<Object>();
 		TestBean testBean = new TestBean();
@@ -63,14 +61,28 @@ keyMap:表列名及属性映射关系。请注意，这是一个LinkedHashMap，
 		keyMap.put("strTest", "string类型");
 
 ```
-4、然后，通过export方法，例子将文件输出到本地d:/yy-export-excel/test.xls
+
+
+###3、基于注解
+基于注解的方式，指的是要excel的列，列名，顺序等由源数据bean中的注解来指定
+
 ```java
-			ExportExcelUtil util = new ExportExcelUtil();
-			OutputStream out = new FileOutputStream("d:/yy-export-excel/test.xls");
-			util.export(sheetContentList, out);
+@ExcelSheet(name = "这是表的名字", order = "strTest,intTest")
+public class TestBean {
+	@SheetCol("字符串")
+	private String strTest;
+	@SheetCol("数字")
+	private int intTest;
+	@SheetCol("时间")
+	private Timestamp timeTest;
+
+	//这里省略get、set方法
+｝
+
 ```
-5、最后，我们看下生成的excel
-完全没有写任何excel配置代码，只关注塞数据，excel就可以生成了。下图为例子所生成的excel，可以看到，每列的顺序，就是keyMap的先后顺序。而时间值已默认转换成可读的时间样式，数字则被右下对齐，方便阅读。每个各自都有边框
-![上传图片](http://image.game.yy.com/o/cloudapp/25586759/170x170/201506-dd57702f_f6b1_48ec_b604_6d782f9608b9.png)
 
+这里假设我们要将List<TestBean>的数据输出为excel，可以像上面这样做注解。
+- 注解ExcelSheet，name属性指定了表的名字，order属性指定了列的顺序，其中的值是bean中的属性名，多个属性用逗号隔开
+- 注解SheetCol,带有这个注解的属性，才会被输出到excel中，且表头的列名，为这里指定的名字
 
+之后调用exportByAnnotation方法，就可以得到excel文件

@@ -64,7 +64,7 @@ keyMap:表列名及属性映射关系。请注意，这是一个LinkedHashMap，
 
 
 ###3、基于注解
-基于注解的方式，指的是要excel的列，列名，顺序等由源数据bean中的注解来指定
+基于注解的方式，指的是excel的列，列名，顺序等由源数据bean中的注解来指定。测试类TestExtend演示了这个方式
 
 ```java
 @ExcelSheet(name = "这是表的名字", order = "strTest,intTest")

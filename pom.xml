@@ -4,24 +4,12 @@
 
   <groupId>com.duowan.officeutil</groupId>
   <artifactId>excel</artifactId>
-  <version>0.9</version>
+  <version>0.95</version>
   <packaging>jar</packaging>
 
   <name>excel</name>
   <url>http://maven.apache.org</url>
 
-	<distributionManagement>
-	<repository>
-		<id>releases</id>
-		<name>Internal Releases</name>
-		<url>http://devserv.game.yy.com:52605/nexus/content/repositories/releases/</url>
-	</repository>
-	<snapshotRepository>
-		<id>snapshots</id>
-		<name>Internal snapshots</name>
-		<url>http://devserv.game.yy.com:52605/nexus/content/repositories/snapshots/</url>
-	</snapshotRepository>
-	</distributionManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

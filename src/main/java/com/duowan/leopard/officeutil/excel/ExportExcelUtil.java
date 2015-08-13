@@ -11,11 +11,13 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import jxl.CellView;
 import jxl.Workbook;
@@ -31,12 +33,16 @@ import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 
+import com.duowan.leopard.officeutil.excel.annotation.ExcelSheet;
+import com.duowan.leopard.officeutil.excel.annotation.SheetCol;
+import com.duowan.leopard.officeutil.excel.bean.ExportExcelBean;
+
 public class ExportExcelUtil {
 
 	public static final int RESULT_SUCC = 0;
 	public static final int RESULT_FAIL = -1;
-	public static final String TYPE_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
-	public static final int fontSize = 10;
+	public String timePrintFormat = "yyyy-MM-dd HH:mm:ss";
+	public int fontSize = 10;
 
 	// 两种字体样式，一种正常样式，一种是粗体样式
 	WritableFont NormalFont = new WritableFont(WritableFont.ARIAL, fontSize);
@@ -46,8 +52,10 @@ public class ExportExcelUtil {
 	WritableCellFormat titleFormat = new WritableCellFormat(BoldFont);
 	// 正文样式1：居中
 	WritableCellFormat contentCenterFormat = new WritableCellFormat(NormalFont);
-	// 正文杨师：右对齐
+	// 正文样式：右对齐
 	WritableCellFormat contentRightFormat = new WritableCellFormat(NormalFont);
+	// 正文样式：右对齐
+	WritableCellFormat contentLeftFormat = new WritableCellFormat(NormalFont);
 
 	WritableWorkbook workbook;
 
@@ -70,6 +78,56 @@ public class ExportExcelUtil {
 		contentRightFormat.setWrap(false);
 	}
 
+	public String getTimePrintFormat() {
+		return timePrintFormat;
+	}
+
+	public void setTimePrintFormat(String timePrintFormat) {
+		this.timePrintFormat = timePrintFormat;
+	}
+
+	public int getFontSize() {
+		return fontSize;
+	}
+
+	public void setFontSize(int fontSize) {
+		NormalFont = new WritableFont(WritableFont.ARIAL, fontSize);
+		BoldFont = new WritableFont(WritableFont.ARIAL, fontSize, WritableFont.BOLD);
+		this.fontSize = fontSize;
+	}
+
+	public WritableCellFormat getTitleFormat() {
+		return titleFormat;
+	}
+
+	public void setTitleFormat(WritableCellFormat titleFormat) {
+		this.titleFormat = titleFormat;
+	}
+
+	public WritableCellFormat getContentCenterFormat() {
+		return contentCenterFormat;
+	}
+
+	public void setContentCenterFormat(WritableCellFormat contentCenterFormat) {
+		this.contentCenterFormat = contentCenterFormat;
+	}
+
+	public WritableCellFormat getContentRightFormat() {
+		return contentRightFormat;
+	}
+
+	public void setContentRightFormat(WritableCellFormat contentRightFormat) {
+		this.contentRightFormat = contentRightFormat;
+	}
+
+	public WritableCellFormat getContentLeftFormat() {
+		return contentLeftFormat;
+	}
+
+	public void setContentLeftFormat(WritableCellFormat contentLeftFormat) {
+		this.contentLeftFormat = contentLeftFormat;
+	}
+
 	/**
 	 * 将数据转成成excel。 特性： 1、将时间类型的值转成yyyy-MM-dd HH:mm:ss 2、将数字类型的值转成带千分符的形式，并右对齐
 	 * 3、除数字类型外，其他类型的值居中显示
@@ -86,7 +144,6 @@ public class ExportExcelUtil {
 	 * @return
 	 */
 	public final int export(List<ExportExcelBean> sheetContentList, OutputStream os) {
-
 		int rs = RESULT_SUCC;
 		try {
 			workbook = Workbook.createWorkbook(os);
@@ -116,6 +173,114 @@ public class ExportExcelUtil {
 		return export(list, os);
 	}
 
+	private boolean isBlank(String str) {
+		int strLen;
+		if (str == null || (strLen = str.length()) == 0) {
+			return true;
+		}
+		for (int i = 0; i < strLen; i++) {
+			if ((Character.isWhitespace(str.charAt(i)) == false)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 将数据转成成excel。 特性： 1、将时间类型的值转成yyyy-MM-dd HH:mm:ss 2、将数字类型的值转成带千分符的形式，并右对齐
+	 * 3、除数字类型外，其他类型的值居中显示
+	 * 
+	 * @param os
+	 *            ，结果输出流
+	 * @param sheets
+	 *            ,数据列表，不定参长，一个参表示一个excel 表，多个参则是多个表，最后这些表会放到一个同个excel文件一起输出
+	 * @return
+	 */
+	public final <T> int exportByAnnotation(OutputStream os, List<T>... sheets) {
+		List<ExportExcelBean> sheetBeanList = new ArrayList<ExportExcelBean>();
+		if (null != sheets && sheets.length > 0) {
+
+			for (int i = 0; i < sheets.length; i++) {
+
+				List<T> sheet = sheets[i];
+
+				if (null != sheet && sheet.size() != 0) {
+
+					ExportExcelBean sheetBean = getSheetBeanByAnnotation(i, sheet);
+
+					sheetBeanList.add(sheetBean);
+				}
+
+			}
+
+		}
+
+		return export(sheetBeanList, os);
+	}
+
+	private <T> ExportExcelBean getSheetBeanByAnnotation(int i, List<T> sheet) {
+		T row = sheet.get(0);
+		Class<?> claaz = row.getClass();
+		String order = "";
+		ExportExcelBean sheetBean = new ExportExcelBean();
+
+		sheetBean.setContentList((List<Object>) sheet);
+
+		// 设置表名
+		if (claaz.isAnnotationPresent(ExcelSheet.class)) {
+			sheetBean.setSheetName(claaz.getAnnotation(ExcelSheet.class).name());
+			order = claaz.getAnnotation(ExcelSheet.class).order();
+		} else {
+			sheetBean.setSheetName("sheet" + (i + 1));
+		}
+
+		// 设置要展示的列
+		LinkedHashMap<String, String> keyMap = new LinkedHashMap<String, String>();
+		Field[] fields = claaz.getDeclaredFields();
+		for (Field field : fields) {
+			field.setAccessible(true);
+			if (field.isAnnotationPresent(SheetCol.class)) {
+				// Object fieldValue = field.get(row);
+				keyMap.put(field.toString().substring(field.toString().lastIndexOf(".") + 1),
+						field.getAnnotation(SheetCol.class).value());
+			}
+		}
+
+		// 如果有定义顺序，要按顺序来展示
+		if (!isBlank(order)) {
+
+			List<String> orderList = Arrays.asList(order.split(","));
+
+			LinkedHashMap<String, String> newKeyMap = new LinkedHashMap<String, String>();
+
+			// 找到定义的顺序
+			for (String o : orderList) {
+				for (Entry<String, String> entry : keyMap.entrySet()) {
+					if (entry.getKey().equals(o)) {
+						newKeyMap.put(entry.getKey(), entry.getValue());
+						continue;
+					}
+				}
+			}
+
+			// 如果仍存在部分字段未定义顺序，则按原先的顺序
+			for (Entry<String, String> keyMapEntry : keyMap.entrySet()) {
+				for (Entry<String, String> newKeyMapEntry : newKeyMap.entrySet()) {
+					if (newKeyMapEntry.getKey().equals(keyMapEntry.getKey())) {
+						continue;
+					}
+				}
+				newKeyMap.put(keyMapEntry.getKey(), keyMapEntry.getValue());
+			}
+			sheetBean.setKeyMap(newKeyMap);
+
+		} else {
+			sheetBean.setKeyMap(keyMap);
+		}
+
+		return sheetBean;
+	}
+
 	private void addSheet(LinkedHashMap<String, String> keyMap, List<Object> listContent, String sheetName, int sheetNum)
 			throws WriteException, RowsExceededException, NoSuchFieldException, IllegalAccessException {
 		// 创建名为sheetName的工作表
@@ -130,45 +295,60 @@ public class ExportExcelUtil {
 		}
 
 		// 设置正文内容
-		for (int i = 0; i < listContent.size(); i++) {
+		for (int row = 0; row < listContent.size(); row++) {
 			Iterator contentIter = keyMap.entrySet().iterator();
-			int colIndex = 0;
-			int listIndex = 0;
+			int col = 0;
 			while (contentIter.hasNext()) {
 				Map.Entry<String, String> entry = (Map.Entry<String, String>) contentIter.next();
 				Object key = entry.getKey();
 
-				Field field = listContent.get(i).getClass().getDeclaredField(key.toString());
+				Field field = listContent.get(row).getClass().getDeclaredField(key.toString());
 				field.setAccessible(true);
-				Object content = field.get(listContent.get(i));
+				Object content = field.get(listContent.get(row));
 
-				String contentStr = null != content ? content.toString() : "";
+				Label label = getContentLabel(col, row + 1, field, content);
+				col++;
 
-				WritableCellFormat cellFormat = contentCenterFormat;
-
-				// 将数字转变成千分位格式
-				String numberStr = getNumbericValue(contentStr);
-				// numberStr不为空，说明是数字类型。
-				if (null != numberStr && !numberStr.trim().equals("")) {
-					contentStr = numberStr;
-					// 数字要右对齐
-					cellFormat = contentRightFormat;
-				} else {
-					// 如果是时间类型。要格式化成标准时间格式
-					String timeStr = getTimeFormatValue(field, content);
-					// timeStr不为空，说明是时间类型
-					if (null != timeStr && !timeStr.trim().equals("")) {
-						contentStr = timeStr;
-					}
-				}
-
-				sheet.addCell(new Label(colIndex++, i + 1, contentStr, cellFormat));
+				sheet.addCell(label);
 
 			}
 
 		}
 
 		setAutoSize(sheet, keyMap.size(), listContent.size());
+	}
+
+	/**
+	 * 每个单元格的内容及格式
+	 * 
+	 * @param col
+	 * @param row
+	 * @param field
+	 * @param content
+	 * @return
+	 */
+	protected Label getContentLabel(int col, int row, Field field, Object content) {
+		WritableCellFormat cellFormat = contentCenterFormat;
+		String contentStr = "";
+		contentStr = null != content ? content.toString() : "";
+		// 将数字转变成千分位格式
+		String numberStr = getNumbericValue(contentStr);
+		// numberStr不为空，说明是数字类型。
+		if (null != numberStr && !numberStr.trim().equals("")) {
+			contentStr = numberStr;
+			// 数字要右对齐
+			cellFormat = contentRightFormat;
+		} else {
+			// 如果是时间类型。要格式化成标准时间格式
+			String timeStr = getTimeFormatValue(field, content);
+			// timeStr不为空，说明是时间类型
+			if (null != timeStr && !timeStr.trim().equals("")) {
+				contentStr = timeStr;
+			}
+		}
+
+		Label label = new Label(col, row, contentStr, cellFormat);
+		return label;
 	};
 
 	/**
@@ -206,14 +386,14 @@ public class ExportExcelUtil {
 	 * @param content
 	 * @return
 	 */
-	private String getTimeFormatValue(Field field, Object content) {
+	protected String getTimeFormatValue(Field field, Object content) {
 		String timeFormatVal = "";
 		if (field.getType().getName().equals(java.sql.Timestamp.class.getName())) {
 			Timestamp time = (Timestamp) content;
-			timeFormatVal = longTimeTypeToStr(time.getTime(), TYPE_YYYY_MM_DD_HH_MM_SS);
+			timeFormatVal = longTimeTypeToStr(time.getTime(), timePrintFormat);
 		} else if (field.getType().getName().equals(java.util.Date.class.getName())) {
 			Date time = (Date) content;
-			timeFormatVal = longTimeTypeToStr(time.getTime(), TYPE_YYYY_MM_DD_HH_MM_SS);
+			timeFormatVal = longTimeTypeToStr(time.getTime(), timePrintFormat);
 		}
 
 		return timeFormatVal;
@@ -225,7 +405,7 @@ public class ExportExcelUtil {
 	 * @param str
 	 * @return
 	 */
-	private String getNumbericValue(String str) {
+	protected String getNumbericValue(String str) {
 		String numbericVal = "";
 		try {
 			Double doubleVal = Double.valueOf(str);
@@ -243,7 +423,7 @@ public class ExportExcelUtil {
 	 * @param formatType
 	 * @return
 	 */
-	public String longTimeTypeToStr(long time, String formatType) {
+	protected String longTimeTypeToStr(long time, String formatType) {
 
 		String strTime = "";
 		if (time >= 0) {
@@ -254,10 +434,6 @@ public class ExportExcelUtil {
 		}
 
 		return strTime;
-
-	}
-
-	public static void main(String[] args) {
 
 	}
 

@@ -1,4 +1,4 @@
-package com.duowan.leopard.officeutil.excel;
+package com.duowan.leopard.officeutil.excel.bean;
 
 import java.util.LinkedHashMap;
 import java.util.List;

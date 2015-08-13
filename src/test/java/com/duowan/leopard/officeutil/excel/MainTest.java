@@ -12,11 +12,36 @@ import java.util.List;
 import junit.framework.TestCase;
 import jxl.write.WriteException;
 
+import com.duowan.leopard.officeutil.excel.bean.ExportExcelBean;
+
 /**
  * @author lizeyang
  * @date 2015年6月3日
  */
-public class Test extends TestCase {
+public class MainTest extends TestCase {
+
+	public void testExportByAnnotation() throws IllegalArgumentException, IllegalAccessException,
+			FileNotFoundException, WriteException {
+
+		List<TestBean> beanList = new ArrayList<TestBean>();
+
+		for (int i = 0; i < 3000; i++) {
+			TestBean bean = new TestBean();
+			bean.setIntTest(10000000);
+			bean.setStrTest("努力造轮子");
+			bean.setTimeTest(new Timestamp(System.currentTimeMillis()));
+			beanList.add(bean);
+		}
+
+		long now = System.currentTimeMillis();
+
+		ExportExcelUtil util = new ExportExcelUtil();
+		OutputStream out = new FileOutputStream("d:/yy-export-excel/test22.xls");
+		util.exportByAnnotation(out, beanList);
+
+		System.out.println(System.currentTimeMillis() - now);
+
+	}
 
 	public void testExport() throws WriteException {
 		long start = System.currentTimeMillis();

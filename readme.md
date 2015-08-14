@@ -15,6 +15,7 @@ maven依赖
 <dependency>
   <groupId>com.github.giantray</groupId>
   <artifactId>exceltool</artifactId>
+  <version>0.95</version>
 </dependency>
 ```
 当前版本为0.95

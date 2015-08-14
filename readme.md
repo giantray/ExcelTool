@@ -9,7 +9,16 @@
 - **值类型自动识别** 检测每个表格的内容，是数字、字符串、还是时间，依据类型的不同，做人性化、合理的显示
 
 ##引入
-正准备把项目发布到maven仓库，还没搞。现在只能先把代码copy到本地使用
+maven依赖
+
+```xml
+<dependency>
+  <groupId>com.github.giantray</groupId>
+  <artifactId>exceltool</artifactId>
+</dependency>
+```
+当前版本为0.95
+
 
 ##如何使用
 提供了两种使用方式，一种是基于传参的方式，一种是基于注解的方式。
